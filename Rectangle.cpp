@@ -176,6 +176,13 @@ struct pt {
 	{
 		x += delta;
 	}
+	friend std::ostream &  operator<<(std::ostream &output, const pt &p)
+	{
+		
+		
+		output << "x=" << p.x << "  y=" << p.y;
+		return output;
+	}
 
 	
 };
@@ -264,6 +271,7 @@ void double_2x(double &x)
 }
 std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 {
+	
 	std::vector<double> S;
 	S.reserve(getRangNewVector());
 	//    result = cos(param * PI / 180.0);
@@ -273,34 +281,63 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 	pt diagFirstPoint_Left, trash_DiagSecondPoint_Right;
 	pt begin, end, iterator_ActualDown,iterator_actualUp;//begin end y=0 y=0
 	
-	const double dX =deltaStep*cos(angle* PI / 180.0);
-	const double dY_div2= deltaStep*sin(angle* PI / 180.0)/2;
+	//const double dX =deltaStep*cos(angle* PI / 180.0);
+	double dX;
+	//const double dY_div2= deltaStep*sin(angle* PI / 180.0)/2;
+
+	pt outline_Down[2];
+	pt outline_Up[2];
+
 	double hold;
 	switch (teckAngle)
 	{
 	case leftDown:
-		hold = norma.second / (tan((180.0 - angle)* PI / 180.0));
-		iterator_ActualDown = begin = make_pt(hold, 0.0);
+		dX = deltaStep / sin(angle* PI / 180.0);
+		hold = norma.second / (tan((angle)* PI / 180.0));
+		iterator_ActualDown = begin = make_pt(-hold, 0.0);
 		end = make_pt(norma.first, 0.0);
 
 		iterator_actualUp = make_pt(0.0, norma.second);
 
-		diagFirstPoint_Left = make_pt(coorDiag[2].first, coorDiag[2].second);
-		trash_DiagSecondPoint_Right = make_pt(coorDiag[3].first, coorDiag[3].second);
+		diagFirstPoint_Left = make_pt(coorDiag[2]);
+		trash_DiagSecondPoint_Right = make_pt(coorDiag[3]);
 
+		
+		outline_Down[0] = make_pt(coorDiag[0]);
+		outline_Down[1] = make_pt(coorDiag[2]);
+		outline_Up[0] = make_pt(coorDiag[2]);
+		outline_Up[1] = make_pt(coorDiag[1]);
 		break;
+	
+
+		
+		
 	case leftUp:
 
+		dX = deltaStep / sin((90.0-angle)* PI / 180.0);
 		iterator_ActualDown=begin = make_pt(0.0, 0.0);
-		hold = norma.second / (tan((angle)* PI / 180.0));
+		hold = norma.second / (tan((90.0-angle)* PI / 180.0));
 		end = make_pt(hold+norma.first, 0.0);
 		
 		iterator_actualUp = make_pt(-hold, norma.second);
 
-		diagFirstPoint_Left = make_pt(coorDiag[0].first, coorDiag[0].second);
-		trash_DiagSecondPoint_Right = make_pt(coorDiag[1].first, coorDiag[1].second);
+		diagFirstPoint_Left = make_pt(coorDiag[0]);
+		trash_DiagSecondPoint_Right = make_pt(coorDiag[1]);
 
+
+		
 		break;
+	}
+	{
+
+		std::cout << "begin " << begin << std::endl;
+		std::cout << "dX=" << dX << std::endl;
+		std::cout << "end " << end << std::endl;
+		std::cout << "diagFirstPoint_Left " << diagFirstPoint_Left << std::endl;
+		std::cout << "trash_DiagSecondPoint_Right " << trash_DiagSecondPoint_Right << std::endl;
+		std::cout << "iterator_actualUp  " << iterator_actualUp << std::endl;
+		std::cout << "iterator_ActualDown" << iterator_ActualDown << std::endl;
+		std::cin.get();
 	}
 	//new version
 	pt downCross;
@@ -314,14 +351,27 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 	bool iter_right_up_angle = true;
 	bool firstIter = true;
 	bool lastIter = true;
-	pt outline_Down[2] = {make_pt(coorDiag[0]),make_pt(coorDiag[2])};
-	pt outline_Up[2] = {make_pt(coorDiag[2]),make_pt(coorDiag[1])};
-	
+	bool display = false;
+	bool finish_calculation = false;
+	int i = -1;
+	//std::cin.get();
 	//для правильной работы шаг долдены быть меньше минамальной стороны фигуры
-	for (; iterator_ActualDown.x < end.x; iterator_ActualDown.deltaX(dX), iterator_actualUp.deltaX(dX))
+	for (iterator_ActualDown=begin; iterator_ActualDown.x < end.x; iterator_ActualDown.deltaX(dX), iterator_actualUp.deltaX(dX))
 	{
+		i++;
+		if (display)
+		{
+			std::cout << i << " ";
+			std::cout << "iterator_actualUp                                  " << iterator_actualUp << std::endl;
+			std::cout << "iterator_ActualDown            " << iterator_ActualDown << std::endl;
+			//std::cin.get();
+		}
+		
+		
 		if (intersect(iterator_ActualDown, iterator_actualUp, diagFirstPoint_Left, trash_DiagSecondPoint_Right, crossDiagLeft, crosDiagRight))
 		{
+			
+
 			if (teckAngle == leftDown)
 			{
 				//intersect(iterator_ActualDown, iterator_actualUp, make_pt(coorDiag[0]), make_pt(coorDiag[2]), downCross, trash);
@@ -333,31 +383,14 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 				if (firstIter)
 				{
 					firstIter = false;
-					double firstDx = distanse(make_pt(coorDiag[2]), crossDiagLeft);
-					hold += 0.5*tecDy*firstDx;
+
+					double first_katet_Dx = distanse(make_pt(coorDiag[2]), upCross);
+					double second_katet_dy = distanse(make_pt(coorDiag[2]), downCross);
+
+					//hold += 0.5*first_katet_Dx*second_katet_dy;
+					
 				}
-				//if((downCross.x<=coorDiag[0].first)&&(upCross.x<=coorDiag[1].first))
-				/*
-				if (iter_left_down_angle &&iter_right_up_angle && (downCross.x)> coorDiag[0].first  && (upCross.x)> coorDiag[1].first)
-				{   //одновременное пересечение
-					iter_left_down_angle = false;
-					iter_right_up_angle = false;
-
-					outline_Up[0] = make_pt(coorDiag[1]);
-					outline_Up[1] = make_pt(coorDiag[3]);
-
-					outline_Down[0] = make_pt(coorDiag[0]);
-					outline_Down[1] = make_pt(coorDiag[3]);
-					intersect(iterator_ActualDown, iterator_actualUp, outline_Down[0], outline_Down[1], downCross, trash);
-					intersect(iterator_ActualDown, iterator_actualUp, outline_Up[0], outline_Up[1], upCross, trash);
-					tecDy = distanse(downCross, upCross);
-
-					//левый нижний угол
-					//hold
-
-
-				}*/
-				else if (iter_left_down_angle&&(downCross.x )> coorDiag[0].first )
+				else if (iter_left_down_angle&&(downCross.y )<coorDiag[0].second )
 				{
 					iter_left_down_angle = false;
 					outline_Down[0] = make_pt(coorDiag[0]);
@@ -367,14 +400,15 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 					//левый нижний угол
 					//hold
 					//
-					hold +=deltaStep*(tecDy);
+					
 					pt tempLeftDown;
 					intersect(make_pt(iterator_ActualDown.x-dX,iterator_ActualDown.y), make_pt(iterator_actualUp.x - dX, iterator_actualUp.y), make_pt(0.0,coorDiag[0].second), make_pt(norma.first,coorDiag[0].second),tempLeftDown, trash);
 					double firstKatet = distanse(tempLeftDown, make_pt(coorDiag[0]));
 					double secondKatet=firstKatet*tan(angle* PI / 180.0);
-					hold -= 0.5*firstKatet*secondKatet;
+					//hold -= 0.5*firstKatet*secondKatet;
+					//hold += deltaStep*(tecDy);
 				}
-				else if (iter_right_up_angle&&(upCross.x )> coorDiag[1].first )
+				else if ( iter_right_up_angle&&(upCross.x )> coorDiag[1].first )
 				{	
 					iter_right_up_angle = false;
 					
@@ -382,7 +416,7 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 					outline_Up[1] = make_pt(coorDiag[3]);
 					intersect(iterator_ActualDown, iterator_actualUp, outline_Up[0], outline_Up[1], upCross, trash);
 					tecDy = distanse(downCross, upCross);
-					hold +=deltaStep*(predDy);
+					
 
 					//правый верхний угол
 					//hold
@@ -390,32 +424,42 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 					intersect(iterator_ActualDown,iterator_actualUp, make_pt(0.0, coorDiag[1].second), make_pt(norma.first, coorDiag[1].second), tempLeftDown, trash);
 					double firstKatet = distanse(tempLeftDown, make_pt(coorDiag[1]));
 					double secondKatet = firstKatet*tan(angle* PI / 180.0);
-					hold -= 0.5*firstKatet*secondKatet;
+					//hold += deltaStep*(predDy);
+					//hold -= 0.5*firstKatet*secondKatet;
 
 				}
-				else if (lastIter&&(upCross.x + dX) > coorDiag[3].first)//последний треугольник
+				else if ( lastIter&&(downCross.x+ dX) > coorDiag[3].first)//последний треугольник
 				{
 					//последний треугольник
 					lastIter = false;
-					double lastDx = distanse(make_pt(coorDiag[3]), crossDiagLeft);
-					hold += 0.5*tecDy*lastDx;
+					finish_calculation = true;
+					double first_katet_Dy = distanse(make_pt(coorDiag[3]), upCross);
+					double second_katet_dx = distanse(make_pt(coorDiag[3]), downCross);
+
+					//hold += 0.5*first_katet_Dy*second_katet_dx;
+					
 				}
-				else if ((upCross.x)> coorDiag[3].first)
+				else if (finish_calculation)
 				{
 					//ничего с холдом не делаем
 				}
 				else if (true)
 					 {
 						
-						//для первой итерации
 						
-						//для следующих итераций
-						//дополнителная точность?
-						
-						//if (abs(tecDy-predDy)<0.001)
-						//hold += tecDy*deltaStep;
-						//else hold += 0.5*deltaStep*(tecDy + predDy);
 						 hold += 0.5*deltaStep*(tecDy + predDy);
+						 //std::cout << i << " ";
+						// std::cout << "true=" << hold << std::endl << std::endl;
+						 if (display)
+						 {
+							 
+							 std::cout <<std:: endl <<std:: endl;
+							 std::cout <<"downCross     " <<downCross << std::endl;
+							 std:: cout << "upCross                           " << upCross <<std:: endl;
+							 std::cout <<std:: endl;
+							 std::cin.get();
+						 }
+						 
 					}
 				
 			}
@@ -427,51 +471,16 @@ std::vector<double> Rectangle::integral(const MyEnum teckAngle)
 				
 				
 		}
-		//std::cout << "Hold=" << hold << std::endl;
+		if (display)
+		{
+			std::cout << i << " ";
+			std::cout << "Hold=" << hold << std::endl;
+		}
+		
 		S.push_back(hold);
 		
 	}
+	std::cout << *(S.end()-1) << std::endl;
 	return S;
-	//firstIter=false;
 	
-	//std::for_each(S.begin(), S.end(), double_2x);
-	/*
-	if (intersect(iterator_ActualDown, iterator_actualUp, diagFirstPoint_Left, trash_DiagSecondPoint_Right, crossDiagLeft, crosDiagRight))
-	{
-	if (teckAngle == leftDown)
-	{
-	hold += dX*(crossDiagLeft.y + dY_div2);
-	}
-	else
-	{
-	hold += dX*(norma.second - crossDiagLeft.y - dY_div2);
-	}
-	}
-	S.push_back(hold);
-	iterator_ActualDown.deltaX(dX);
-	iterator_actualUp.deltaX(dX);
-	for (; iterator_ActualDown.x < end.x; iterator_ActualDown.deltaX(dX), iterator_actualUp.deltaX(dX))
-	{
-		hold = *(S.vector::end() - 1);
-		if (intersect(iterator_ActualDown,iterator_actualUp,diagFirstPoint_Left,trash_DiagSecondPoint_Right,crossDiagLeft,crosDiagRight))
-		{
-			if (teckAngle == leftDown)
-			{
-				//hold += dX*(crossDiagLeft.y+dY_div2-coorDiag[0].second);
-				hold += dX*(crossDiagLeft.y - coorDiag[0].second);
-				
-			}
-			else
-			{
-				//hold+= dX*(norma.second-crossDiagLeft.y - dY_div2 - coorDiag[0].second);
-				hold += dX*(norma.second - crossDiagLeft.y  - coorDiag[0].second);
-			}	
-			//std::cout << "dx" << dX << "                  dY" << crossDiagLeft.y + dY_div2 - coorDiag[0].second << std::endl;
-			//std::cin.get();
-		}
-		S.push_back(hold);
-	}
-	//std::for_each(S.begin(), S.end(), double_2x);
-	return S;
-	*/
 }
